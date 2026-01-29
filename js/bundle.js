@@ -15,7 +15,6 @@ if (header) {
 
 document.addEventListener('DOMContentLoaded', function() {
   const menuItems = document.querySelectorAll('.menu-item-has-children');
-  let hoverTimer;
 
   function setupMenu() {
     const isDesktop = window.innerWidth >= 1025;
@@ -30,56 +29,62 @@ document.addEventListener('DOMContentLoaded', function() {
         subMenu.style.cssText = '';
       }
 
-      if (isDesktop) {
-        item.addEventListener('mouseenter', () => {
-          clearTimeout(hoverTimer);
-          item.classList.add('hover-active');
-        });
+      const link = item.querySelector('a');
+      if (link) {
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
 
-        item.addEventListener('mouseleave', () => {
-          hoverTimer = setTimeout(() => {
-            item.classList.remove('hover-active');
-          }, 500);
-        });
+          if (isDesktop) {
+            const wasActive = item.classList.contains('hover-active');
 
-        if (subMenu) {
-          subMenu.addEventListener('mouseenter', () => {
-            clearTimeout(hoverTimer);
-            item.classList.add('hover-active');
-          });
+            menuItems.forEach(otherItem => {
+              otherItem.classList.remove('hover-active');
+              const otherSubMenu = otherItem.querySelector('.sub-menu');
+              if (otherSubMenu) otherSubMenu.style.cssText = '';
+            });
 
-          subMenu.addEventListener('mouseleave', () => {
-            hoverTimer = setTimeout(() => {
-              item.classList.remove('hover-active');
-            }, 500);
-          });
-        }
-      } else {
-        if (subMenu) {
-          subMenu.style.overflow = 'hidden';
-          subMenu.style.transition = 'max-height 0.3s ease';
-          subMenu.style.maxHeight = '0';
-        }
-
-        item.addEventListener('click', function(e) {
-          if (e.target.closest('a')) e.preventDefault();
-
-          const wasActive = this.classList.contains('accordion-active');
-
-          menuItems.forEach(other => {
-            if (other !== this) {
-              other.classList.remove('accordion-active');
-              const otherSub = other.querySelector('.sub-menu');
-              if (otherSub) otherSub.style.maxHeight = '0';
+            if (!wasActive) {
+              item.classList.add('hover-active');
             }
-          });
+          } else {
+            const wasActive = item.classList.contains('accordion-active');
 
-          this.classList.toggle('accordion-active');
+            menuItems.forEach(other => {
+              if (other !== item) {
+                other.classList.remove('accordion-active');
+                const otherSub = other.querySelector('.sub-menu');
+                if (otherSub) otherSub.style.maxHeight = '0';
+              }
+            });
 
+            item.classList.toggle('accordion-active');
+
+            if (subMenu) {
+              subMenu.style.maxHeight = item.classList.contains('accordion-active')
+                  ? subMenu.scrollHeight + 'px'
+                  : '0';
+            }
+          }
+        });
+      }
+
+      if (!isDesktop && subMenu) {
+        subMenu.style.overflow = 'hidden';
+        subMenu.style.transition = 'max-height 0.3s ease';
+        subMenu.style.maxHeight = '0';
+      }
+    });
+
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.menu-item-has-children')) {
+        menuItems.forEach(item => {
+          item.classList.remove('hover-active', 'accordion-active');
+          const subMenu = item.querySelector('.sub-menu');
           if (subMenu) {
-            subMenu.style.maxHeight = this.classList.contains('accordion-active')
-                ? subMenu.scrollHeight + 'px'
-                : '0';
+            subMenu.style.cssText = '';
+            if (!isDesktop) {
+              subMenu.style.maxHeight = '0';
+            }
           }
         });
       }
@@ -91,7 +96,6 @@ document.addEventListener('DOMContentLoaded', function() {
   let resizeTimer;
   window.addEventListener('resize', () => {
     clearTimeout(resizeTimer);
-    clearTimeout(hoverTimer);
     resizeTimer = setTimeout(setupMenu, 250);
   });
 });
@@ -633,4 +637,41 @@ var swiper1 = new Swiper(".blog-slider", {
   }
 });
 
+var swiper2 = new Swiper(".gallery-slider", {
+  observer: true,
+  observeParents: true,
+  observeSlideChildren: true,
+  watchSlidesProgress: true,
+  navigation: {
+    nextEl: ".content-block-slider .swiper-button-next",
+    prevEl: ".content-block-slider .swiper-button-prev",
+  },
+  breakpoints: {
+    320: {
+      slidesPerView: 1.4,
+      spaceBetween: 20,
+    },
+    601: {
+      slidesPerView: 1.75,
+      spaceBetween: 20,
+    },
+    1025: {
+      slidesPerView: 2.35,
+      spaceBetween: 20,
+    },
+  }
+});
 
+document.addEventListener('DOMContentLoaded', function() {
+  const imageWrappers = document.querySelectorAll('.images-wrapper');
+
+  imageWrappers.forEach(wrapper => {
+    const images = wrapper.querySelectorAll('img');
+
+    if (images.length === 1) {
+      wrapper.classList.add('single-image');
+    } else if (images.length === 2) {
+      wrapper.classList.add('double-image');
+    }
+  });
+});
