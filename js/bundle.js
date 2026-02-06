@@ -675,3 +675,51 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 });
+
+var swiper4 = new Swiper(".gallery-slider-main", {
+  spaceBetween: 10,
+  slidesPerView: 1,
+  effect: "fade",
+  observer: true,
+  observeParents: true,
+  watchSlidesProgress: true,
+  navigation: {
+    nextEl: ".gallery-slider-main .swiper-button-next",
+    prevEl: ".gallery-slider-main .swiper-button-prev",
+  },
+});
+
+var swiper3 = new Swiper(".gallery-slider-thumbs", {
+  spaceBetween: 20,
+  slidesPerView: 10,
+  watchSlidesProgress: true,
+  observer: true,
+  observeParents: true,
+  breakpoints: {
+    0: {
+      slidesPerView: 5,
+      spaceBetween: 10,
+    },
+    1025: {
+      slidesPerView: 10,
+      spaceBetween: 20,
+    },
+  },
+  on: {
+    click: function() {
+      var clickedIndex = this.clickedIndex;
+
+      swiper4.slideTo(clickedIndex);
+
+      this.slideTo(clickedIndex);
+    }
+  }
+});
+
+swiper4.on('slideChange', function() {
+  swiper3.slideTo(swiper4.activeIndex);
+});
+
+swiper3.on('slideChange', function() {
+  swiper4.slideTo(swiper3.activeIndex);
+});
